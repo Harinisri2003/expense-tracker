@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date as date_type
 from typing import Optional
+from typing import Dict
 
 class UserCreate(BaseModel):
     """What the client sends us on signup"""
@@ -37,3 +38,7 @@ class ExpenseRead(BaseModel):
     category: str
     note: Optional[str] = None
     date: date_type
+
+class ExpenseSummary(BaseModel):
+    total: float
+    by_category: Dict[str, float]
