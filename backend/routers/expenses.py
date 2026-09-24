@@ -7,6 +7,7 @@ from schemas import ExpenseCreate, ExpenseRead
 from auth_utils import get_current_user
 from typing import List
 from sqlmodel import select
+from fastapi import HTTPException, status
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
@@ -37,3 +38,20 @@ def list_expenses(
     ).all()
 
     return expenses
+
+@router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_expense(
+    expense_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    expense = session.get(Expense, expense_id)
+
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+
+    if expense.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this expense")
+
+    session.delete(expense)
+    session.commit()
